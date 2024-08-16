@@ -47,7 +47,6 @@ class AWP:
                 norm1 = torch.norm(param.grad)
                 norm2 = torch.norm(param.data.detach())
                 if norm1 != 0 and not torch.isnan(norm1):
-                    # 在损失函数之前获得梯度
                     r_at = self.gamma * param.grad / (norm1 + e) * (norm2 + e)
                     param.data.add_(r_at)
                     param.data = torch.min(

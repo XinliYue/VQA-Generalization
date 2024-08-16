@@ -266,36 +266,6 @@ def get_spatial_samples(
                                                        **arg)
     return sampled_video
 
-def cutout(tensor, mask_size, mask_value=0):
-    """
-    在 Tensor 图像上随机遮挡一个矩形区域。
-
-    参数:
-    - tensor: 输入图像，类型为 Tensor，形状为 [bs, c, h, w]。
-    - mask_size: 遮挡区域的大小，类型为整数。
-    - mask_value: 遮挡区域的像素值，默认为 0。
-
-    返回:
-    - 处理后的 Tensor 图像。
-    """
-    bs, c, h, w = tensor.shape
-    
-    for i in range(bs):
-        # 随机选择遮挡区域的中心点
-        center_x = random.randint(0, w)
-        center_y = random.randint(0, h)
-        
-        # 计算遮挡区域的边界
-        x1 = max(0, center_x - mask_size // 2)
-        y1 = max(0, center_y - mask_size // 2)
-        x2 = min(w, center_x + mask_size // 2)
-        y2 = min(h, center_y + mask_size // 2)
-        
-        # 在图像上应用遮挡
-        tensor[i, :, y1:y2, x1:x2] = mask_value
-    
-    return tensor
-
 def get_spatial_and_temporal_samples(
     video_path,
     sample_types,
@@ -303,7 +273,6 @@ def get_spatial_and_temporal_samples(
     is_train=False,
     augment=False,
     transforms=None,
-    cutout_size=0,
 ):
     video = {}
     if video_path.endswith(".yuv"):
@@ -336,8 +305,6 @@ def get_spatial_and_temporal_samples(
     for stype, sopt in sample_types.items():
         if transforms is not None:
             video[stype] = transforms(video[stype].permute(1, 0, 2, 3)).permute(1, 0, 2, 3)
-        if cutout_size != 0:
-            video[stype] = cutout(video[stype], cutout_size)
         sampled_video[stype] = get_single_sample(video[stype], stype, 
                                                        **sopt)
         # if transforms is not None:
@@ -609,9 +576,6 @@ class FusionDataset(torch.utils.data.Dataset):
             trans.append(v2.RandomHorizontalFlip(0.5))
         if trans != []:
             self.transforms = v2.Compose(trans)
-        self.cutout_size = 0
-        if "cutout_size" in opt:
-            self.cutout_size = opt["cutout_size"]
 
 
     def refresh_hypers(self):
@@ -647,7 +611,7 @@ class FusionDataset(torch.utils.data.Dataset):
         ## Read Original Frames
         ## Process Frames
         data, frame_inds = get_spatial_and_temporal_samples(filename, self.sample_types, self.samplers, 
-                                                            self.phase == "train", self.augment and (self.phase == "train"), transforms=self.transforms, cutout_size=self.cutout_size
+                                                            self.phase == "train", self.augment and (self.phase == "train"), transforms=self.transforms
                                                            )
         
         for k, v in data.items():
