@@ -110,17 +110,12 @@ def main():
     parser.add_argument("-o", "--opt", type=str, 
                         default="./options/fast-SAMA-test.yml", help="the option file")
     parser.add_argument("--model_dir", type=str, default="")
-    parser.add_argument('--wecrop', action='store_true', default=False)
     parser.add_argument("--log_path", type=str, default="")
     args = parser.parse_args()
     
     logger.info(args)
     with open(args.opt, "r") as f:
         opt = yaml.safe_load(f)
-    for key in opt["data"]:
-        if args.wecrop:
-            opt["data"][key]["args"]["wecrop"] = True
-            logger.info("Using WeCrop")
     logger.info(opt)
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
