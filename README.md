@@ -1,6 +1,6 @@
 ## Revisiting Video Quality Assessment from the Perspective of Generalization
 
-Code for AAAI 2025 submission paper "Revisiting Video Quality Assessment from the Perspective of Generalization".
+Code for CVPR 2025 submission paper "Revisiting Video Quality Assessment from the Perspective of Generalization".
 
 ## Environment
 
